@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Jewelry</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b1916" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="manifest" href="myjewelry.webmanifest">
+<style>
+  :root {
+    --bg: #f6f3ee; --card: #ffffff; --text: #2a2622; --muted: #6f675e; --line: #e3ddd4;
+    --accent: #9a6b2f; --accent-ink: #ffffff; --accent-soft: #f3e8d7; --warn: #b4442c; --ok: #2f8a57;
+    --input: #fffdf9; --bar: #ffffff; --shadow: 0 1px 2px rgba(40, 30, 20, .05), 0 4px 14px rgba(40, 30, 20, .05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1b1916; --card: #24211d; --text: #eee8df; --muted: #a59c90; --line: #3a352f;
+      --accent: #d9a35a; --accent-ink: #1b1916; --accent-soft: #3a2f20; --warn: #ef8a72; --ok: #5cc28a;
+      --input: #1f1d1a; --bar: #211e1a; --shadow: none; }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); -webkit-tap-highlight-color: transparent;
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  [hidden] { display: none !important; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; }
+
+  /* top bar and tabs */
+  .top { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .top .in { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+  .logo { width: 34px; height: 34px; border-radius: 9px; }
+  .top h1 { font-size: 19px; margin: 0; font-weight: 650; white-space: nowrap; }
+  .tabs { display: flex; gap: 4px; margin-left: 12px; }
+  .tab { display: flex; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--muted);
+    padding: 8px 12px; border-radius: 10px; font: 500 14.5px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; cursor: pointer; }
+  .tab svg { width: 20px; height: 20px; }
+  .tab:hover { color: var(--text); }
+  .tab.on { background: var(--accent-soft); color: var(--accent); }
+  .pill { margin-left: auto; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line); border-radius: 14px; padding: 4px 10px; background: transparent; cursor: pointer; white-space: nowrap; }
+  .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .pill.ok i { background: var(--ok); } .pill.warn i { background: var(--warn); }
+  @media (max-width: 759px) {
+    .tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; z-index: 30; background: var(--bar);
+      border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+      padding-bottom: env(safe-area-inset-bottom); }
+    .tab { flex-direction: column; gap: 4px; min-height: 58px; justify-content: center; border-radius: 0; font-size: 11.5px; }
+    .tab.on { background: transparent; }
+    .wrap { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+    body[data-view="calc"] .wrap { padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
+  }
+
+  /* shared bits */
+  h2 { font-size: 17px; margin: 0 0 6px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  h2 .amt { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+  .muted { color: var(--muted); font-weight: 400; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px;
+    background: var(--input); color: var(--text); font: inherit; min-width: 0; }
+  textarea { resize: vertical; min-height: 74px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button { font: inherit; cursor: pointer; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); padding: 9px 14px; }
+  button:hover { border-color: var(--accent); }
+  button:disabled { opacity: .55; cursor: default; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button.x { padding: 6px 10px; color: var(--muted); }
+  button.add { margin-top: 8px; color: var(--accent); }
+  button.danger { color: var(--warn); width: 100%; background: transparent; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .actions button { flex: 1; min-height: 44px; }
+  .stack { display: grid; gap: 12px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; padding: 8px 14px; background: transparent; }
+  .seg button.on { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex-shrink: 0; display: inline-block; }
+  .dot.on { background: var(--ok); }
+
+  /* inventory */
+  .toolbar { display: flex; gap: 8px; align-items: center; margin: 16px 0 10px; }
+  .toolbar input { flex: 1; }
+  .toolbar button { white-space: nowrap; min-height: 42px; }
+  .chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 8px; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex-shrink: 0; min-height: 34px; padding: 0 13px; border-radius: 17px; border: 1px solid var(--line);
+    background: transparent; color: var(--muted); font-size: 13.5px; }
+  .chip.on { background: var(--text); border-color: var(--text); color: var(--bg); }
+  .stats { color: var(--muted); font-size: 13px; margin: 2px 0 12px; }
+  .list { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 760px) { .list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1060px) { .list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .item { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%;
+    padding: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; text-align: left;
+    color: inherit; box-shadow: var(--shadow); }
+  .thumb { width: 64px; height: 80px; border-radius: 10px; overflow: hidden; background: var(--accent-soft);
+    display: grid; place-items: center; color: var(--muted); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb svg { width: 26px; height: 26px; opacity: .6; }
+  .item .nm { font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item .sub { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px; }
+  .badges { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 8px; border: 1px solid currentColor; line-height: 17px; }
+  .badge.web { color: var(--ok); } .badge.sold { color: var(--muted); } .badge.stale { color: var(--accent); }
+  .item .pr { font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .item .pr small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+  .empty { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 40px 16px; }
+
+  /* piece page */
+  .pbar { display: flex; align-items: center; gap: 8px; margin: 12px 0; }
+  .back { border: 0; background: transparent; color: var(--accent); padding: 8px 4px; font-weight: 600; }
+  .pgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 18px; align-items: start; }
+  .pgrid > div { min-width: 0; }
+  @media (min-width: 900px) { .pgrid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } }
+  .strip { display: flex; gap: 10px; overflow-x: auto; padding: 2px 0 4px; scrollbar-width: thin; }
+  .ph { position: relative; flex: 0 0 132px; aspect-ratio: 4 / 5; border-radius: 12px; overflow: hidden; background: var(--accent-soft); }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ph button { position: absolute; top: 6px; width: 32px; height: 32px; padding: 0; border-radius: 16px; border: 0;
+    background: rgba(20, 18, 16, .72); color: #fff; font-size: 15px; line-height: 1; }
+  .ph .x2 { right: 6px; } .ph .star { left: 6px; }
+  .ph .cover { position: absolute; left: 6px; bottom: 6px; font-size: 11px; font-weight: 600; color: #fff;
+    background: rgba(20, 18, 16, .72); padding: 1px 7px; border-radius: 7px; }
+  .addph { flex: 0 0 132px; aspect-ratio: 4 / 5; border: 1.5px dashed var(--accent); border-radius: 12px; display: grid;
+    place-items: center; color: var(--accent); text-align: center; font-weight: 600; cursor: pointer; padding: 8px; font-size: 14px; }
+  .addph input { display: none; }
+  .addph.off { border-color: var(--line); color: var(--muted); font-weight: 400; font-size: 12.5px; cursor: default; }
+  .line { display: flex; justify-content: space-between; padding: 5px 0; font-variant-numeric: tabular-nums; }
+  .line span:first-child { color: var(--muted); }
+  .line.total { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 9px; font-weight: 600; }
+  .webstatus { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+
+  /* calculator */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: start; margin-top: 16px; }
+  @media (max-width: 859px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+  .row { display: grid; gap: 8px; align-items: end; padding: 10px 0; border-top: 1px dashed var(--line); }
+  .row:first-of-type { border-top: 0; }
+  .wire-row { grid-template-columns: 1.3fr .8fr 1fr .9fr .7fr .6fr .9fr auto; }
+  .stone-row { grid-template-columns: 2fr 1fr .7fr auto; }
+  .supply-row { grid-template-columns: 2fr 1fr auto; }
+  .weigh-row { grid-template-columns: 1.5fr 1fr 1.2fr auto; }
+  @media (max-width: 640px) {
+    .wire-row { grid-template-columns: 1fr 1fr 1fr; }
+    .stone-row, .supply-row, .weigh-row { grid-template-columns: 1fr 1fr; }
+  }
+  .out { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; padding-bottom: 6px; }
+  .out b { color: var(--text); }
+  .summary { position: sticky; top: 72px; }
+  .price { background: var(--accent-soft); border-radius: 10px; padding: 12px; margin-top: 12px; text-align: center; }
+  .price .big { font-size: 32px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .price .small { font-size: 12px; color: var(--muted); }
+  .cbar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin: 12px 0 6px; background: var(--line); }
+  .cbar div { height: 100%; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; }
+  details summary { cursor: pointer; font-weight: 600; }
+  .live { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--accent-soft);
+    border-radius: 9px; padding: 8px 10px; margin-bottom: 4px; }
+  .prow { grid-template-columns: 1.3fr 1fr .9fr auto; align-items: center; }
+  .cal-row { grid-template-columns: 1.4fr .8fr 1fr 1fr auto; }
+  @media (max-width: 640px) { .prow, .cal-row { grid-template-columns: 1fr 1fr; } }
+  .chk { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text); margin: 0; cursor: pointer; }
+  .chk input { width: auto; }
+  .h3 { font-size: 14px; margin: 18px 0 4px; }
+  .saved-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .saved-item:first-child { border-top: 0; }
+  .saved-item .meta { font-size: 12px; color: var(--muted); }
+  .pickrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 640px) { .pickrow { grid-template-columns: 1fr; } }
+  .mini { display: none; }
+  @media (max-width: 859px) {
+    body[data-view="calc"] .mini { display: flex; position: fixed; left: 0; right: 0; z-index: 25;
+      bottom: 0; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 16px;
+      background: var(--accent-soft); border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+    .mini b { color: var(--accent); font-size: 20px; }
+  }
+  @media (max-width: 759px) { body[data-view="calc"] .mini { bottom: calc(58px + env(safe-area-inset-bottom)); } }
+
+  .toasts { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(80px + env(safe-area-inset-bottom));
+    z-index: 50; display: grid; gap: 8px; width: min(420px, calc(100vw - 32px)); pointer-events: none; }
+  @media (min-width: 760px) { .toasts { bottom: 24px; } }
+  .toast { background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 10px; font-size: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .25); }
+</style>
+</head>
+<body data-view="inventory">
+<header class="top"><div class="in">
+  <img class="logo" src="icons/icon-192.png" alt="">
+  <h1>My Jewelry</h1>
+  <nav class="tabs" aria-label="Sections">
+    <button class="tab" data-tab="inventory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9 4l3 5 3-5M12 9v11"/></svg><span>Inventory</span></button>
+    <button class="tab" data-tab="calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11v6M8 14h2M12 14h2M8 17h2M12 17h2"/></svg><span>Calculator</span></button>
+    <button class="tab" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>Account</span></button>
+  </nav>
+  <button class="pill" id="pill" data-act="go" data-to="settings"><i></i><span></span></button>
+</div></header>
+
+<main class="wrap">
+  <!-- Inventory -->
+  <section class="view" id="view-inventory">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search pieces" aria-label="Search pieces">
+      <button class="primary" data-act="new-piece">+ New piece</button>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Show"></div>
+    <p class="stats" id="stats"></p>
+    <div class="list" id="invList"></div>
+  </section>
+
+  <!-- One piece -->
+  <section class="view" id="view-piece" hidden></section>
+
+  <!-- Calculator add-on -->
+  <section class="view" id="view-calc" hidden>
+    <div class="layout">
+      <div>
+        <div class="card">
+          <h2>Pricing</h2>
+          <div class="pickrow">
+            <div><label for="calcPick">Piece</label><select id="calcPick"></select></div>
+            <div><label for="calcName">Name</label><input id="calcName" placeholder="e.g. Copper spiral pendant"></div>
+          </div>
+          <div class="actions" id="calcActs"></div>
+        </div>
+
+        <div class="card">
+          <details id="pricesBox">
+            <summary>Metal prices <span class="hint" id="pricesNote"></span></summary>
+            <p class="hint" style="margin-top:8px">Silver, gold and copper follow the live market (the same prices as your Metal Prices widget). Brass and bronze have no live price, so enter what you pay. Untick "Live" to type your own price instead.</p>
+            <div id="priceRows"></div>
+            <h3 class="h3">Match your supplier's prices (Rio Grande)</h3>
+            <p class="hint">The market price is raw metal only. Suppliers charge extra to make it into wire. Look up a wire's price per foot on <a href="https://www.riogrande.com" target="_blank" rel="noopener">riogrande.com</a> and enter it once. The calculator works out their extra charge and keeps it while the metal price follows the market. Gauges you haven't added use the closest one you have.</p>
+            <div class="row cal-row">
+              <div><label>Metal</label><select id="calMetal"></select></div>
+              <div><label>Gauge</label><select id="calGauge"></select></div>
+              <div><label>Shape</label><select id="calShape"></select></div>
+              <div><label>Their price ($/ft)</label><input id="calPerFt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
+              <div><button data-act="cal-add">Add</button></div>
+            </div>
+            <div class="out" id="calMsg"></div>
+            <div id="calList"></div>
+          </details>
+        </div>
+
+        <div class="card">
+          <h2>Wire <span class="amt" id="wireTotal">$0.00</span></h2>
+          <p class="hint">One line per wire size. "Strands" is how many pieces of that length you cut.</p>
+          <div id="wireRows"></div>
+          <button class="add" data-add="wires">+ Add wire</button>
+        </div>
+
+        <div class="card">
+          <h2>Metal by weight <span class="amt" id="weighTotal">$0.00</span></h2>
+          <p class="hint">No need to measure wire: weigh the metal and it's priced at today's market price.</p>
+          <div id="weighRows"></div>
+          <button class="add" data-add="weights">+ Add metal by weight</button>
+        </div>
+
+        <div class="card">
+          <h2>Stones <span class="amt" id="stoneTotal">$0.00</span></h2>
+          <p class="hint">What you paid for each stone (or your share of a lot).</p>
+          <div id="stoneRows"></div>
+          <button class="add" data-add="stones">+ Add stone</button>
+        </div>
+
+        <div class="card">
+          <h2>Other supplies <span class="amt" id="supplyTotal">$0.00</span></h2>
+          <p class="hint">Clasps, chain, cord, jump rings, liver of sulfur, packaging and so on.</p>
+          <div id="supplyRows"></div>
+          <button class="add" data-add="supplies">+ Add supply</button>
+        </div>
+
+        <div class="card">
+          <h2>Your time <span class="amt" id="laborTotal">$0.00</span></h2>
+          <div class="grid2">
+            <div><label>Hours</label><input type="number" inputmode="numeric" min="0" step="1" data-k="laborHours" placeholder="0"></div>
+            <div><label>Minutes</label><input type="number" inputmode="numeric" min="0" step="5" data-k="laborMinutes" placeholder="0"></div>
+            <div><label>Hourly rate ($)</label><input type="number" inputmode="decimal" min="0" step="0.5" data-k="rate" data-setting="rate" placeholder="e.g. 20"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Gas &amp; travel <span class="amt" id="travelTotal">$0.00</span></h2>
+          <p class="hint">Trips to find stones. If one trip supplied stones for several pieces, split the cost between them.</p>
+          <div class="seg" id="travelSeg" style="margin-bottom:10px">
+            <button data-mode="miles">From miles</button>
+            <button data-mode="direct">I know what I spent</button>
+          </div>
+          <div class="grid2" id="travelMiles">
+            <div><label>Round-trip miles</label><input type="number" inputmode="decimal" min="0" data-k="miles" placeholder="0"></div>
+            <div><label>Car's MPG</label><input type="number" inputmode="decimal" min="0" data-k="mpg" data-setting="mpg" placeholder="e.g. 25"></div>
+            <div><label>Gas price ($/gal)</label><input type="number" inputmode="decimal" min="0" step="0.01" data-k="gasPrice" data-setting="gasPrice" placeholder="e.g. 3.25"></div>
+            <div><label>Other trip costs ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" data-k="tripExtra" placeholder="tolls, fees"></div>
+          </div>
+          <div class="grid2" id="travelDirect">
+            <div><label>Total trip cost ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" data-k="travelDirect" placeholder="0"></div>
+          </div>
+          <div class="grid2" style="margin-top:10px">
+            <div><label>Pieces this trip supplies</label><input type="number" inputmode="numeric" min="1" step="1" data-k="pieces" placeholder="1"></div>
+          </div>
+          <div class="out" id="travelOut" style="padding:8px 0 0"></div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="card">
+          <h2>Price estimate</h2>
+          <div class="line"><span>Wire</span><span id="sWire">$0.00</span></div>
+          <div class="line" id="sWeighLine"><span>Metal by weight</span><span id="sWeigh">$0.00</span></div>
+          <div class="line"><span>Stones</span><span id="sStone">$0.00</span></div>
+          <div class="line"><span>Supplies</span><span id="sSupply">$0.00</span></div>
+          <div class="line"><span>Gas &amp; travel</span><span id="sTravel">$0.00</span></div>
+          <div class="line"><span>Your time</span><span id="sLabor">$0.00</span></div>
+          <div class="line total"><span>Total cost</span><span id="sCost">$0.00</span></div>
+          <div class="cbar" id="cbar"></div>
+          <div class="legend" id="legend"></div>
+          <div class="grid2" style="margin-top:14px">
+            <div><label>Profit markup (%)</label><input type="number" inputmode="decimal" min="0" step="5" data-k="markup" data-setting="markup"></div>
+            <div><label>Round price up to</label>
+              <select data-k="roundTo" data-setting="roundTo">
+                <option value="0">Don't round</option><option value="1">Nearest $1</option>
+                <option value="5">Nearest $5</option><option value="10">Nearest $10</option>
+              </select></div>
+          </div>
+          <div class="line"><span>Profit</span><span id="sProfit">$0.00</span></div>
+          <div class="price">
+            <div class="small">Suggested price</div>
+            <div class="big" id="sPrice">$0.00</div>
+            <div class="small" id="sWhole"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Account -->
+  <section class="view" id="view-settings" hidden></section>
+</main>
+
+<div class="mini" id="mini"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ======================= setup ======================= */
+const SB = { url: 'https://wfdtchehoepyrsgfavry.supabase.co', key: 'sb_publishable_2ZEjSCViEP9O_TFbFtC9BQ_lhrXUe-g', bucket: 'jewelry-photos' };
+const OWNER_EMAIL = 'masonwaltetec@gmail.com';
+const SITE_URL = 'https://masonwaltetec-design.github.io/gemsandjewelry/';
+const APP_URL = 'https://masonwaltetec-design.github.io/myjewelry/';
+
+const METALS = {
+  copper:    { name: 'Copper',               density: 8.96,  unit: 'lb'  },
+  brass:     { name: 'Brass',                density: 8.53,  unit: 'lb'  },
+  bronze:    { name: 'Bronze',               density: 8.80,  unit: 'lb'  },
+  sterling:  { name: 'Sterling silver .925', density: 10.36, unit: 'toz' },
+  argentium: { name: 'Argentium silver',     density: 10.20, unit: 'toz' },
+  fine:      { name: 'Fine silver .999',     density: 10.49, unit: 'toz' },
+  gold10:    { name: 'Gold 10k',             density: 11.57, unit: 'toz' },
+  gold14:    { name: 'Gold 14k',             density: 13.07, unit: 'toz' },
+  gold24:    { name: 'Fine gold 24k',        density: 19.32, unit: 'toz' },
+};
+const PRICE_UNITS = { toz: ['per troy oz', 31.1035], g: ['per gram', 1], oz: ['per oz (regular)', 28.3495], lb: ['per lb', 453.592] };
+const WEIGHT_UNITS = { g: ['grams', 1], toz: ['troy oz', 31.1035], oz: ['oz (regular)', 28.3495], dwt: ['dwt (pennyweight)', 1.55517] };
+const LEN_MM = { in: 25.4, cm: 10, ft: 304.8 };
+const SHAPES = { round: 'Round', square: 'Square', half: 'Half-round' };
+const GAUGES = []; for (let g = 10; g <= 30; g++) GAUGES.push(g);
+// Metals that follow the live market: [market, purity]. Silver and gold per troy oz, copper per lb
+// (api.gold-api.com, the same feed as the Metal Prices widget).
+const LIVE = { copper: ['copper', 1], sterling: ['silver', 0.925], argentium: ['silver', 0.935], fine: ['silver', 0.999],
+  gold10: ['gold', 0.417], gold14: ['gold', 0.585], gold24: ['gold', 0.999] };
+const MARKET_GRAMS = { silver: 31.1035, gold: 31.1035, copper: 453.592 };
+const COLORS = { wire: '#b87333', metal: '#a8a29a', stone: '#5b8fa8', supply: '#8a8f5a', travel: '#c4a14a', labor: '#9a6b9e' };
+const awgMm = n => 0.127 * Math.pow(92, (36 - n) / 39);   // AWG gauge -> wire diameter (mm)
+
+const $ = id => document.getElementById(id);
+const num = v => { const n = parseFloat(v); return isFinite(n) && n > 0 ? n : 0; };
+const money = n => '$' + (+n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const opts = (pairs, sel) => pairs.map(([v, t]) => `<option value="${esc(v)}"${String(v) === String(sel) ? ' selected' : ''}>${esc(t)}</option>`).join('');
+const uid = () => (crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+const hash = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+const dateStr = t => new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+// JSON with sorted keys, so two copies of the same data always compare equal
+const canon = v => v === null || typeof v !== 'object' ? JSON.stringify(v) :
+  Array.isArray(v) ? '[' + v.map(x => x === undefined ? 'null' : canon(x)).join(',') + ']' :
+  '{' + Object.keys(v).filter(k => v[k] !== undefined).sort().map(k => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+function store(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } }
+function put(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+function toast(text) {
+  const el = document.createElement('div'); el.className = 'toast'; el.textContent = text;
+  $('toasts').append(el); setTimeout(() => el.remove(), 3500);
+}
+
+/* ======================= data ======================= */
+// Everything lives in one object (localStorage "mj_data") and syncs as one row in Supabase (jewelry_calc).
+// Pieces merge one by one (newest edit wins), so the PC and the phone never wipe each other's changes.
+let db = null;
+const defaultSettings = () => {
+  const prices = {};
+  for (const k in METALS) prices[k] = { value: '', unit: METALS[k].unit, live: !!LIVE[k] };
+  return { prices, spot: {}, cal: [], rate: '', mpg: '', gasPrice: '', markup: 100, roundTo: '1' };
+};
+function fixSettings(s) {
+  s = Object.assign(defaultSettings(), s || {});
+  if (!s.prices) s.prices = {};
+  if (!Array.isArray(s.cal)) s.cal = [];
+  if (!s.spot) s.spot = {};
+  for (const k in METALS) {
+    if (!s.prices[k]) s.prices[k] = { value: '', unit: METALS[k].unit };
+    if (s.prices[k].live === undefined) s.prices[k].live = !!LIVE[k];
+  }
+  return s;
+}
+const blankWire = () => ({ metal: 'copper', gauge: 20, shape: 'round', length: '', unit: 'in', strands: 1, costPerFt: '' });
+function newCalc() {
+  const s = (db && db.settings) || defaultSettings();
+  return { wires: [blankWire()], weights: [], stones: [{ name: '', cost: '', qty: 1 }], supplies: [{ name: '', cost: '' }],
+    laborHours: '', laborMinutes: '', rate: s.rate, travelMode: 'miles', miles: '', mpg: s.mpg, gasPrice: s.gasPrice,
+    tripExtra: '', travelDirect: '', pieces: 1, markup: s.markup, roundTo: s.roundTo };
+}
+function fixCalc(c) {
+  c = Object.assign(newCalc(), c || {});
+  for (const k of ['wires', 'weights', 'stones', 'supplies']) if (!Array.isArray(c[k])) c[k] = [];
+  delete c.web; delete c._price; delete c.name;
+  return c;
+}
+const newPiece = (o = {}) => Object.assign({ id: uid(), name: '', created: Date.now(), updated: Date.now(), status: 'in',
+  price: '', materials: '', description: '', notes: '', photos: [], calc: null, web: { id: null, published: false, at: 0, sig: '' } }, o);
+function fixPiece(p) {
+  p = Object.assign(newPiece({ id: p.id || uid() }), p);
+  if (!Array.isArray(p.photos)) p.photos = [];
+  p.web = Object.assign({ id: null, published: false, at: 0, sig: '' }, p.web || {});
+  if (p.calc) p.calc = fixCalc(p.calc);
+  return p;
+}
+const blankDb = () => ({ v: 2, settings: defaultSettings(), settingsAt: 0, pieces: [], deleted: {}, updatedAt: 0 });
+function normalizeDb(d) {
+  d = Object.assign(blankDb(), d);
+  d.settings = fixSettings(d.settings);
+  d.pieces = (d.pieces || []).map(fixPiece);
+  d.deleted = d.deleted || {};
+  return d;
+}
+// Old "Jewelry Price Calculator" data (saved pieces) -> inventory. Ids come from the name, so the PC
+// and the phone turn the same old piece into the same inventory piece.
+function pieceFromV1(st, name, date, ts) {
+  st = st || {}; const w = st.web || {};
+  const nm = String(name || st.name || 'Untitled piece');
+  return fixPiece({ id: 'v1-' + hash(nm), name: nm, created: Date.parse(date) || ts, updated: 1,
+    status: w.status === 'sold' ? 'sold' : 'in', price: w.price ?? '', materials: w.materials || '', description: w.description || '',
+    photos: Array.isArray(w.photos) ? w.photos : [], calc: st, web: { id: w.id || null, published: !!w.published, at: w.id ? 1 : 0, sig: '' } });
+}
+function fromV1(d) {
+  const now = Date.now();
+  const pieces = (d.pieces || []).map((x, i) => pieceFromV1(x.state, x.name, x.date, now - i * 1000));
+  const c = d.current;
+  if (c && (c.name || (c.wires || []).some(w => num(w.length)) || (c.web && c.web.id))) {
+    const nm = c.name || 'Untitled piece';
+    if (!pieces.some(p => p.name === nm)) pieces.unshift(pieceFromV1(c, nm, null, now));
+  }
+  const seen = new Set();
+  return { v: 2, settings: fixSettings(d.settings), settingsAt: 1, pieces: pieces.filter(p => !seen.has(p.id) && seen.add(p.id)), deleted: {}, updatedAt: 1 };
+}
+function loadDb() {
+  const d = store('mj_data', null);
+  if (d && d.v === 2) return normalizeDb(d);
+  // first run on the PC: bring in the old calculator's saved pieces (same browser storage)
+  const old = { settings: store('jc_settings', null), pieces: store('jc_pieces', []) || [], current: store('jc_current', null) };
+  if (old.settings || old.pieces.length || old.current) return normalizeDb(fromV1(old));
+  return blankDb();
+}
+db = loadDb();
+put('mj_data', db);
+let draft = store('mj_draft', null) || { name: '', calc: null };
+draft.calc = draft.calc ? fixCalc(draft.calc) : null;
+
+const getPiece = id => db.pieces.find(p => p.id === id);
+// after waiting on the internet, a sync may have swapped in a fresh copy of the piece: use that one
+const fresher = p => getPiece(p.id) || p;
+function commit() {
+  db.updatedAt = Date.now(); put('mj_data', db);
+  if (session) { clearTimeout(syncT); setSync('Saving…'); syncT = setTimeout(syncNow, 1500); }
+}
+function touchPiece(p) { p.updated = Date.now(); commit(); }
+function settingsChanged() { db.settingsAt = Date.now(); commit(); }
+
+/* ======================= account + sync ======================= */
+let session = store('mj_session', null) || store('jc_session', null);
+const sync = { text: '', msg: '', at: null };
+let syncBusy = false, syncT = null;
+async function sb(path, o = {}) {
+  const blob = o.body instanceof Blob;
+  const h = Object.assign({ apikey: SB.key }, o.body !== undefined && !blob ? { 'Content-Type': 'application/json' } : {}, o.headers || {});
+  if (o.auth !== false && session) h.Authorization = 'Bearer ' + session.access_token;
+  let r;
+  try { r = await fetch(SB.url + path, { method: o.method || 'GET', headers: h, body: o.body === undefined ? undefined : blob ? o.body : JSON.stringify(o.body) }); }
+  catch (e) { const er = new Error("Couldn't reach the internet. Check your connection."); er.offline = true; throw er; }
+  const t = await r.text(); let j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {}
+  if (!r.ok) { const er = new Error((j && (j.msg || j.error_description || j.message || j.error)) || ('The server answered ' + r.status)); er.status = r.status; throw er; }
+  return j;
+}
+function friendly(e) {
+  const m = String(e && e.message || e);
+  if (e && e.offline) return m;
+  if (/does not exist|could not find the table|bucket not found|schema cache/i.test(m)) return 'The database is not set up yet. Run supabase-setup.sql in Supabase first.';
+  if (/row-level security|violates|unauthorized|not allowed|permission/i.test(m) || (e && e.status === 403)) return `This account isn't allowed to change the website. Sign in as ${OWNER_EMAIL}.`;
+  return m;
+}
+function setSession(j) {
+  session = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000, user: { id: j.user.id, email: j.user.email } };
+  put('mj_session', session);
+}
+function signOut() { session = null; try { localStorage.removeItem('mj_session'); localStorage.removeItem('jc_session'); } catch (e) {} setSync('', ''); renderAll(); }
+async function fresh() {
+  if (!session) return false;
+  if (Date.now() < session.expires_at - 60000) return true;
+  try { setSession(await sb('/auth/v1/token?grant_type=refresh_token', { method: 'POST', auth: false, body: { refresh_token: session.refresh_token } })); return true; }
+  catch (e) { if (e.status === 400 || e.status === 401) { signOut(); sync.msg = 'Your sign-in expired. Sign in again.'; renderAcct(); } return false; }
+}
+const payload = d => ({ v: 2, settings: Object.assign({}, d.settings, { spot: undefined }), settingsAt: d.settingsAt || 0,
+  pieces: d.pieces, deleted: d.deleted, updatedAt: d.updatedAt || 0 });
+const dataKey = d => canon(Object.assign(payload(d), { updatedAt: 0 }));
+function merge(a, b) {
+  const deleted = Object.assign({}, b.deleted || {});
+  for (const [k, t] of Object.entries(a.deleted || {})) deleted[k] = Math.max(deleted[k] || 0, t);
+  const map = new Map();
+  for (const p of (b.pieces || []).concat(a.pieces || [])) { const q = map.get(p.id); if (!q || (p.updated || 0) > (q.updated || 0)) map.set(p.id, p); }
+  const pieces = [...map.values()].filter(p => !((deleted[p.id] || 0) >= (p.updated || 0))).sort((x, y) => (y.created || 0) - (x.created || 0));
+  const mine = (a.settingsAt || 0) >= (b.settingsAt || 0);
+  return normalizeDb({ v: 2, settings: Object.assign({}, mine ? a.settings : b.settings, { spot: a.settings.spot }),
+    settingsAt: Math.max(a.settingsAt || 0, b.settingsAt || 0), pieces, deleted, updatedAt: Math.max(a.updatedAt || 0, b.updatedAt || 0) });
+}
+async function syncNow() {
+  if (!session) return;
+  if (syncBusy) { clearTimeout(syncT); syncT = setTimeout(syncNow, 1000); return; }
+  syncBusy = true;
+  try {
+    if (!await fresh()) return;
+    const rows = await sb('/rest/v1/jewelry_calc?select=data&user_id=eq.' + session.user.id);
+    let remote = rows && rows[0] && rows[0].data;
+    if (remote) remote = remote.v === 2 ? normalizeDb(remote) : normalizeDb(fromV1(remote));
+    const merged = remote ? merge(db, remote) : db;
+    if (dataKey(merged) !== dataKey(db)) { db = merged; put('mj_data', db); softRender(); }
+    if (!remote || dataKey(merged) !== dataKey(remote)) {
+      const data = Object.assign(payload(db), { updatedAt: Date.now() });
+      await sb('/rest/v1/jewelry_calc?on_conflict=user_id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+        body: { user_id: session.user.id, data, updated_at: new Date().toISOString() } });
+    }
+    sync.at = Date.now(); setSync('Synced', '');
+  } catch (e) {
+    setSync(e.offline ? 'Offline' : 'Sync problem', e.offline ? 'Saved on this device. It will sync when you are back online.' : friendly(e));
+  } finally { syncBusy = false; }
+}
+async function signIn() {
+  const em = $('inEmail').value.trim(), pw = $('inPass').value;
+  if (!em || !pw) { setSync('', 'Enter your email and password.'); return; }
+  setSync('Signing in…', '');
+  try { setSession(await sb('/auth/v1/token?grant_type=password', { method: 'POST', auth: false, body: { email: em, password: pw } })); }
+  catch (e) { session = null; setSync('', e.message === 'Invalid login credentials' ? 'That email and password did not match. Use the login you use for Hearthfield sync.' : friendly(e)); return; }
+  await syncNow();
+  if (sync.text === 'Synced') sync.msg = 'Signed in. Your inventory is the same on every device now.';
+  renderAll();
+}
+function setSync(text, msg) { sync.text = text; if (msg !== undefined) sync.msg = msg; renderPill(); renderAcct(); }
+function renderPill() {
+  const p = $('pill');
+  p.className = 'pill' + (!session ? '' : sync.text === 'Synced' ? ' ok' : /problem|Offline/.test(sync.text) ? ' warn' : '');
+  p.querySelector('span').textContent = session ? (sync.text || 'Signed in') : 'Not signed in';
+}
+function renderAcct() {
+  const box = $('acctBody'); if (!box) return;
+  const msg = sync.msg ? `<p class="hint" style="margin:10px 0 0;color:var(--text)">${esc(sync.msg)}</p>` : '';
+  if (!session) {
+    box.innerHTML = `<p class="hint">Sign in with the email and password you use for Hearthfield sync. Your inventory then stays the same on your PC and phone, you can add photos and post pieces to your website, and Juniper ticks off your jewelry chores.</p>
+      <div class="grid2"><div><label for="inEmail">Email</label><input type="email" id="inEmail" autocomplete="email" value="${esc(OWNER_EMAIL)}"></div>
+      <div><label for="inPass">Password</label><input type="password" id="inPass" autocomplete="current-password"></div></div>
+      <div class="actions"><button class="primary" data-act="sign-in">Sign in</button></div>${msg}`;
+    return;
+  }
+  const ago = sync.at ? Math.max(0, Math.round((Date.now() - sync.at) / 60000)) : null;
+  box.innerHTML = `<div><b>Signed in as ${esc(session.user.email)}</b></div>
+    <div class="hint" style="margin:2px 0 0">${esc(sync.text || 'Signed in')}${ago !== null ? ' · last synced ' + (ago ? ago + ' min ago' : 'just now') : ''}</div>${msg}
+    <div class="actions"><button data-act="sync-now">Sync now</button><button data-act="sign-out">Sign out</button></div>`;
+}
+
+/* ======================= prices + math ======================= */
+let spotStatus = '';
+function metalPerGram(k) {
+  const p = db.settings.prices[k], L = LIVE[k], spot = db.settings.spot;
+  if (L && p.live) return spot[L[0]] ? spot[L[0]] * L[1] / MARKET_GRAMS[L[0]] : null;
+  return num(p.value) ? num(p.value) / PRICE_UNITS[p.unit][1] : null;
+}
+function areaMm2(gauge, shape) { const d = awgMm(+gauge); return shape === 'square' ? d * d : shape === 'half' ? Math.PI * d * d / 8 : Math.PI * d * d / 4; }
+const gramsPerFt = (metal, gauge, shape) => areaMm2(gauge, shape) * 304.8 / 1000 * METALS[metal].density;
+function findCal(metal, gauge, shape) {
+  const list = db.settings.cal.filter(c => c.metal === metal);
+  const score = c => Math.abs(c.gauge - gauge) * 2 + (c.shape === shape ? 0 : 1);
+  return list.length ? list.reduce((a, b) => score(b) < score(a) ? b : a) : null;
+}
+function wireCalc(w) {
+  const d = awgMm(+w.gauge), strands = Math.max(1, Math.round(num(w.strands)) || 1);
+  const lenMm = num(w.length) * (LEN_MM[w.unit] || 25.4) * strands;
+  const grams = areaMm2(w.gauge, w.shape) * lenMm / 1000 * METALS[w.metal].density, feet = lenMm / 304.8;
+  let cost = null, source = '';
+  if (num(w.costPerFt)) { cost = feet * num(w.costPerFt); source = 'your $/ft'; }
+  else {
+    const base = metalPerGram(w.metal);
+    if (base != null) {
+      const c = findCal(w.metal, +w.gauge, w.shape);
+      cost = grams * Math.max(0, base + (c ? c.fab : 0));
+      source = (LIVE[w.metal] && db.settings.prices[w.metal].live ? 'live market' : 'your metal price') +
+        (c ? ` + supplier markup (from your ${c.gauge} ga ${SHAPES[c.shape].toLowerCase()} price)` : ', raw metal only (add a supplier price for accuracy)');
+    }
+  }
+  return { d, grams, feet, cost, source };
+}
+// All the numbers for one piece's calculator data.
+function compute(c) {
+  if (!c) return null;
+  let wire = 0, weighed = 0, missing = false;
+  const wires = c.wires.map(w => { const r = wireCalc(w); if (r.cost == null && num(w.length)) missing = true; wire += r.cost || 0; return r; });
+  const weights = c.weights.map(m => {
+    const grams = num(m.weight) * (WEIGHT_UNITS[m.unit] || WEIGHT_UNITS.g)[1], base = metalPerGram(m.metal);
+    if (base == null && grams) missing = true;
+    const cost = base == null ? null : grams * base; weighed += cost || 0;
+    return { grams, base, cost };
+  });
+  const stone = c.stones.reduce((t, s) => t + num(s.cost) * (Math.round(num(s.qty)) || 1), 0);
+  const supply = c.supplies.reduce((t, s) => t + num(s.cost), 0);
+  const labor = (num(c.laborHours) + num(c.laborMinutes) / 60) * num(c.rate);
+  const pieces = Math.max(1, Math.round(num(c.pieces)) || 1);
+  let trip = 0, tripNote = '';
+  if (c.travelMode !== 'direct') {
+    const gallons = num(c.mpg) ? num(c.miles) / num(c.mpg) : 0;
+    trip = gallons * num(c.gasPrice) + num(c.tripExtra);
+    if (num(c.miles) && !num(c.mpg)) tripNote = 'Add your MPG to work out gas. ';
+    else if (gallons) tripNote = `${gallons.toFixed(2)} gallons · `;
+  } else trip = num(c.travelDirect);
+  const travel = trip / pieces;
+  const cost = wire + weighed + stone + supply + travel + labor;
+  let price = cost * (1 + num(c.markup) / 100);
+  const r = +c.roundTo;
+  if (r && price > 0) price = Math.ceil(price / r - 1e-9) * r;
+  return { wires, weights, wire, weighed, stone, supply, labor, travel, trip, tripNote, pieces, cost, price, profit: price - cost, missing };
+}
+const suggestedOf = p => { const r = p.calc && compute(p.calc); return r && r.price > 0 ? Math.round(r.price * 100) / 100 : null; };
+const ownPrice = p => { const v = parseFloat(p.price); return isFinite(v) && v >= 0 && p.price !== '' ? v : null; };
+const shownPrice = p => { const v = ownPrice(p); return v != null ? v : suggestedOf(p); };
+function autoMaterials(c) {
+  if (!c) return '';
+  const metals = c.wires.filter(w => num(w.length)).map(w => METALS[w.metal].name.replace(/ \.\d+$/, '') + ' wire')
+    .concat(c.weights.filter(m => num(m.weight)).map(m => METALS[m.metal].name.replace(/ \.\d+$/, '')));
+  const stones = c.stones.map(s => (s.name || '').trim()).filter(Boolean);
+  return [...new Set(metals.concat(stones))].join(', ');
+}
+async function loadSpot() {
+  spotStatus = 'Checking market prices…'; if (view === 'calc') renderPrices();
+  try {
+    const [s, c, g] = await Promise.all(['XAG', 'HG', 'XAU'].map(sym =>
+      fetch('https://api.gold-api.com/price/' + sym, { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })));
+    if (!(s.price > 0 && c.price > 0 && g.price > 0)) throw new Error('bad data');
+    db.settings.spot = { silver: s.price, copper: c.price, gold: g.price, at: Date.now() };
+    put('mj_data', db);
+    spotStatus = 'Live';
+  } catch (e) {
+    spotStatus = db.settings.spot.silver ? 'Offline: using the last prices it found' : "Couldn't reach market prices. Untick Live and enter prices yourself.";
+  }
+  if (view === 'calc') { renderPrices(); calcNumbers(); } else softRender();
+}
+
+/* ======================= views ======================= */
+let view = 'inventory', pieceId = null, invFilter = 'all', invQuery = '', needRender = false;
+let calcTarget = store('mj_calc_target', 'draft');
+const webBusy = {}, webMsg = {}, photoBusy = {};
+const isLive = p => !!(p.web.id && p.web.published);
+const sigOf = p => canon({ name: p.name, description: p.description, materials: p.materials, price: p.price, status: p.status, photos: p.photos });
+const isStale = p => isLive(p) && p.web.sig && p.web.sig !== sigOf(p);
+const photoUrl = p => /^(https?:|data:|blob:)/.test(p) ? p : `${SB.url}/storage/v1/object/public/${SB.bucket}/${p.split('/').map(encodeURIComponent).join('/')}`;
+const GEM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18"/></svg>';
+
+function parseHash() {
+  const prev = view === 'piece' ? pieceId : null;
+  const [v, arg] = location.hash.slice(1).split('=');
+  if (v === 'piece' && arg && getPiece(decodeURIComponent(arg))) { view = 'piece'; pieceId = decodeURIComponent(arg); }
+  else if (v === 'calc') { view = 'calc'; if (arg) setCalcTarget(arg === 'new' ? 'draft' : decodeURIComponent(arg), true); }
+  else if (v === 'settings') view = 'settings';
+  else view = 'inventory';
+  if (prev && !(view === 'piece' && pieceId === prev)) dropIfEmpty(prev);
+  renderAll(); window.scrollTo(0, 0);
+}
+function go(h) { if (location.hash === '#' + h) parseHash(); else location.hash = h; }
+// a "New piece" that was left completely empty is removed again
+function dropIfEmpty(id) {
+  const p = getPiece(id);
+  if (p && !p.name.trim() && !p.photos.length && !p.calc && p.price === '' && !p.description && !p.notes && !p.web.id) {
+    db.pieces = db.pieces.filter(x => x !== p); db.deleted[p.id] = Date.now(); commit();
+  }
+}
+function renderAll() {
+  document.querySelectorAll('.view').forEach(v => { v.hidden = v.id !== 'view-' + view; });
+  const tab = view === 'piece' ? 'inventory' : view;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+  document.body.dataset.view = view;
+  if (view === 'inventory') renderInventory();
+  else if (view === 'piece') renderPiece();
+  else if (view === 'calc') renderCalc();
+  else renderSettings();
+  renderPill();
+}
+// redraw after a background sync, but never while a box is being typed in
+function softRender() {
+  const a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest('main')) { needRender = true; return; }
+  needRender = false; renderAll();
+}
+document.addEventListener('focusout', () => setTimeout(() => {
+  const a = document.activeElement;
+  if (needRender && !(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) { needRender = false; renderAll(); }
+}, 60));
+
+/* ---------- Inventory ---------- */
+function renderInventory() {
+  const ps = db.pieces;
+  const counts = { all: ps.length, in: ps.filter(p => p.status !== 'sold').length, web: ps.filter(isLive).length, sold: ps.filter(p => p.status === 'sold').length };
+  $('chips').innerHTML = [['all', 'All'], ['in', 'In stock'], ['web', 'On website'], ['sold', 'Sold']]
+    .map(([k, t]) => `<button class="chip${invFilter === k ? ' on' : ''}" data-act="filter" data-f="${k}">${t} ${counts[k]}</button>`).join('');
+  const worth = ps.filter(p => p.status !== 'sold').reduce((t, p) => t + (shownPrice(p) || 0), 0);
+  $('stats').textContent = ps.length ? `${counts.in} in stock, worth ${money(worth)} at your prices` : '';
+  if ($('search').value !== invQuery) $('search').value = invQuery;
+  renderInvList();
+}
+function renderInvList() {
+  const q = invQuery.trim().toLowerCase();
+  const list = db.pieces.filter(p => (invFilter === 'all' || (invFilter === 'in' && p.status !== 'sold') || (invFilter === 'sold' && p.status === 'sold') || (invFilter === 'web' && isLive(p)))
+    && (!q || [p.name, p.materials, autoMaterials(p.calc), p.description, p.notes].join(' ').toLowerCase().includes(q)));
+  if (!list.length) {
+    $('invList').innerHTML = `<div class="empty">${db.pieces.length ? 'No pieces match.' : 'No pieces yet. Press <b>+ New piece</b> to add your first one, or price one in the Calculator and save it.'}</div>`;
+    return;
+  }
+  $('invList').innerHTML = list.map(p => {
+    const own = ownPrice(p), sug = own == null ? suggestedOf(p) : null, ph = p.photos[0];
+    return `<button class="item" data-act="open-piece" data-id="${esc(p.id)}">
+      <span class="thumb">${ph ? `<img src="${esc(photoUrl(ph))}" alt="" loading="lazy">` : GEM}</span>
+      <span style="min-width:0"><div class="nm">${esc(p.name || 'Untitled piece')}</div>
+        <div class="sub">${esc(p.materials || autoMaterials(p.calc) || (p.photos.length ? p.photos.length + ' photo' + (p.photos.length === 1 ? '' : 's') : 'No details yet'))}</div>
+        <div class="badges">${p.status === 'sold' ? '<span class="badge sold">Sold</span>' : ''}${isLive(p) ? '<span class="badge web">On website</span>' : ''}${isStale(p) ? '<span class="badge stale">Website needs update</span>' : ''}</div></span>
+      <span class="pr">${own != null ? money(own) : sug != null ? money(sug) + '<small>suggested</small>' : '<small>no price</small>'}</span>
+    </button>`;
+  }).join('');
+}
+
+/* ---------- One piece ---------- */
+const curPiece = () => view === 'piece' ? getPiece(pieceId) : null;
+function photosHtml(p) {
+  const busy = photoBusy[p.id];
+  const add = !session ? `<div class="addph off">Sign in (Account) to add photos</div>`
+    : `<label class="addph${busy ? ' off' : ''}">${busy ? esc(busy) : '+ Add photos'}<input type="file" id="photoIn" accept="image/*" multiple${busy ? ' disabled' : ''}></label>`;
+  return p.photos.map((ph, i) => `<div class="ph"><img src="${esc(photoUrl(ph))}" alt="Photo ${i + 1}" loading="lazy">
+    ${i ? `<button class="star" data-act="cover" data-i="${i}" title="Make this the cover photo" aria-label="Make photo ${i + 1} the cover">★</button>` : '<span class="cover">Cover</span>'}
+    <button class="x2" data-act="del-photo" data-i="${i}" title="Remove photo" aria-label="Remove photo ${i + 1}">✕</button></div>`).join('') + add;
+}
+function renderPiece() {
+  const p = curPiece(), el = $('view-piece');
+  if (!p) { el.innerHTML = ''; return; }
+  const r = p.calc ? compute(p.calc) : null, sug = r && r.price > 0 ? r.price : null, own = ownPrice(p);
+  el.innerHTML = `
+    <div class="pbar"><button class="back" data-act="go" data-to="inventory">‹ Inventory</button>
+      <span class="hint" style="margin:0 0 0 auto">Added ${esc(dateStr(p.created))}</span></div>
+    <div class="pgrid">
+      <div>
+        <div class="card"><div class="strip" id="strip">${photosHtml(p)}</div></div>
+        <div class="card stack">
+          <div><label for="pName">Name</label><input id="pName" data-p="name" value="${esc(p.name)}" placeholder="e.g. Copper spiral pendant"></div>
+          <div><label>Status</label><div class="seg">${[['in', 'In stock'], ['sold', 'Sold']].map(([v, t]) => `<button data-act="status" data-v="${v}" class="${p.status === v ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+          <div><label for="pPrice">Your price ($)</label><input id="pPrice" type="number" inputmode="decimal" min="0" step="1" data-p="price" value="${esc(p.price)}" placeholder="${sug != null ? sug.toFixed(2) : '0.00'}">
+            <div class="hint" id="priceHint" style="margin:4px 0 0">${priceHint(p, sug)}</div></div>
+          <div><label for="pMat">Materials</label><input id="pMat" data-p="materials" value="${esc(p.materials)}" placeholder="${esc(autoMaterials(p.calc) || 'e.g. Copper wire, labradorite')}"></div>
+          <div><label for="pDesc">Description <span class="muted">(shown on your website)</span></label><textarea id="pDesc" data-p="description" placeholder="A sentence or two: size, the stone, how you made it.">${esc(p.description)}</textarea></div>
+          <div><label for="pNotes">Private notes <span class="muted">(only you see these)</span></label><textarea id="pNotes" data-p="notes" placeholder="Where the stone came from, who it's for, where it's stored…">${esc(p.notes)}</textarea></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h2>Pricing</h2>
+          ${r ? `<div class="line"><span>Cost (materials, time, travel)</span><span>${money(r.cost)}</span></div>
+            <div class="line"><span>Suggested price</span><span>${money(r.price)}</span></div>
+            <div class="line total"><span>Profit at ${own != null ? 'your' : 'suggested'} price</span><span>${money((own != null ? own : r.price) - r.cost)}</span></div>`
+            : '<p class="hint" style="margin:0">Not priced yet. The calculator adds up wire, metal, stones, supplies, time and gas, and suggests a price.</p>'}
+          <div class="actions"><button data-act="price-it">${p.calc ? 'Open in calculator' : 'Price it in the calculator'}</button></div>
+        </div>
+        <div class="card" id="webBox"></div>
+        <button class="danger" data-act="delete-piece">Delete piece</button>
+      </div>
+    </div>`;
+  renderWebBox(p);
+}
+function priceHint(p, sug) {
+  if (sug == null) return 'Tip: price it in the calculator to get a suggested price.';
+  return p.price === '' ? `Using the calculator's suggested price (${money(sug)}). Type to set your own.` : `The calculator suggests ${money(sug)}.`;
+}
+function renderWebBox(p) {
+  const box = $('webBox'); if (!box) return;
+  if (!session) { box.innerHTML = `<h2>Your website</h2><p class="hint" style="margin:0">Sign in (Account) to post pieces to Gems &amp; Jewelry.</p>`; return; }
+  const live = isLive(p), busy = webBusy[p.id];
+  box.innerHTML = `<h2>Your website</h2>
+    <div class="webstatus"><span class="dot${live ? ' on' : ''}"></span>${live ? `On Gems &amp; Jewelry · <a href="${SITE_URL}#p=${esc(p.web.id)}" target="_blank" rel="noopener">see it ↗</a>` : p.web.id ? 'Hidden from your website' : 'Not on your website'}</div>
+    ${isStale(p) ? '<p class="hint" style="margin:8px 0 0;color:var(--accent)">You changed this piece since posting. Press Update website to show the changes.</p>' : ''}
+    <p class="hint" style="margin:8px 0 0">Only the name, photos, materials, price, description and Sold go online. Costs and notes stay private.</p>
+    <div class="actions"><button class="primary" data-act="post"${busy ? ' disabled' : ''}>${live ? 'Update website' : p.web.id ? 'Post again' : 'Post to website'}</button>
+      ${live ? `<button data-act="hide"${busy ? ' disabled' : ''}>Hide from website</button>` : ''}</div>
+    <div class="out" style="padding:8px 0 0">${busy ? esc(busy) : webMsg[p.id] || ''}</div>`;
+}
+function publicFields(p) {
+  return { name: (p.name || 'Untitled piece').trim(), description: (p.description || '').trim(), materials: (p.materials || autoMaterials(p.calc)).trim(),
+    price: shownPrice(p), status: p.status === 'sold' ? 'sold' : 'available', photos: p.photos };
+}
+async function postPiece(p, show) {
+  if (!await fresh()) { webMsg[p.id] = '<span class="warn">Sign in first (Account).</span>'; renderWebBox(p); return; }
+  const body = Object.assign(publicFields(p), { published: show, updated_at: new Date().toISOString() });
+  webBusy[p.id] = show ? 'Posting to your website…' : 'Hiding…'; renderWebBox(p);
+  try {
+    let rows = p.web.id ? await sb('/rest/v1/jewelry_pieces?id=eq.' + encodeURIComponent(p.web.id), { method: 'PATCH', headers: { Prefer: 'return=representation' }, body }) : [];
+    if (!rows || !rows.length) rows = await sb('/rest/v1/jewelry_pieces', { method: 'POST', headers: { Prefer: 'return=representation' }, body });
+    p = fresher(p);
+    p.web = { id: rows[0].id, published: show, at: Date.now(), sig: sigOf(p) };
+    touchPiece(p);
+    webMsg[p.id] = show ? `<span class="ok">Done. It's on your website.</span>` : 'Hidden. It no longer shows on your website.';
+  } catch (e) { webMsg[p.id] = `<span class="warn">${esc(friendly(e))}</span>`; }
+  delete webBusy[p.id];
+  if (curPiece() && curPiece().id === p.id) renderWebBox(curPiece());
+}
+// keep the website's photo list in step when photos change on a posted piece
+async function pushPhotos(p) {
+  if (!isLive(p)) return;
+  try {
+    await sb('/rest/v1/jewelry_pieces?id=eq.' + encodeURIComponent(p.web.id), { method: 'PATCH', body: { photos: p.photos, updated_at: new Date().toISOString() } });
+    p = fresher(p);
+    if (p.web.sig) { const s = JSON.parse(p.web.sig); s.photos = p.photos; p.web.sig = canon(s); }
+    touchPiece(p);
+  } catch (e) { webMsg[p.id] = `<span class="warn">Photos saved, but the website didn't update: ${esc(friendly(e))}</span>`; }
+}
+// Shrink a photo before uploading (max 1600 px, JPEG) so it loads fast and saves space.
+async function shrink(file, max = 1600) {
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch (e) { throw new Error(`"${file.name}" isn't a photo this app can open.`); }
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  if (bmp.close) bmp.close();
+  return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('Could not prepare the photo.')), 'image/jpeg', 0.85));
+}
+async function addPhotos(p, files) {
+  if (!files.length || !p) return;
+  if (!await fresh()) { toast('Sign in first (Account).'); return; }
+  let done = 0;
+  const id = p.id, here = () => curPiece() && curPiece().id === id;
+  const redraw = () => { if (here()) $('strip').innerHTML = photosHtml(fresher(p)); };
+  try {
+    for (const f of files) {
+      photoBusy[id] = `Uploading ${done + 1} of ${files.length}…`; redraw();
+      const blob = await shrink(f);
+      const path = `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      await sb(`/storage/v1/object/${SB.bucket}/${path}`, { method: 'POST', headers: { 'Content-Type': 'image/jpeg' }, body: blob });
+      p = fresher(p); p.photos.push(path); done++; touchPiece(p);
+    }
+    toast(`${done} photo${done === 1 ? '' : 's'} added${isLive(p) ? ' (website updated)' : ''}.`);
+  } catch (e) { toast(friendly(e) + (done ? ` (${done} uploaded first)` : '')); }
+  delete photoBusy[id];
+  if (done) await pushPhotos(fresher(p));
+  if (here()) renderPiece();
+}
+async function delPhoto(p, i) {
+  const path = p.photos[i];
+  if (path === undefined || !confirm('Remove this photo?')) return;
+  p.photos.splice(i, 1); touchPiece(p); renderPiece();
+  await pushPhotos(p);
+  try { await sb(`/storage/v1/object/${SB.bucket}/${path}`, { method: 'DELETE' }); } catch (e) {}
+  if (curPiece() && curPiece().id === p.id) renderWebBox(curPiece());
+}
+async function deletePiece(p) {
+  if (!confirm(`Delete "${p.name || 'Untitled piece'}" from your inventory?` + (isLive(p) ? ' It will also be taken off your website.' : ''))) return;
+  if (isLive(p)) { try { await sb('/rest/v1/jewelry_pieces?id=eq.' + encodeURIComponent(p.web.id), { method: 'PATCH', body: { published: false } }); } catch (e) {} }
+  db.pieces = db.pieces.filter(x => x !== p); db.deleted[p.id] = Date.now(); commit();
+  if (calcTarget === p.id) setCalcTarget('draft');
+  toast('Piece deleted.'); go('inventory');
+}
+
+/* ---------- Calculator add-on ---------- */
+function setCalcTarget(t, quiet) {
+  calcTarget = t === 'draft' || getPiece(t) ? t : 'draft';
+  put('mj_calc_target', calcTarget);
+  if (!quiet && view === 'calc') renderCalc();
+}
+function curCalc() {
+  if (calcTarget !== 'draft') {
+    const p = getPiece(calcTarget);
+    if (p) { if (!p.calc) p.calc = newCalc(); return p.calc; }
+    calcTarget = 'draft';
+  }
+  if (!draft.calc) draft.calc = newCalc();
+  return draft.calc;
+}
+function calcEdited() {
+  if (calcTarget !== 'draft') touchPiece(getPiece(calcTarget)); else put('mj_draft', draft);
+}
+function renderCalc() {
+  const c = curCalc(), p = calcTarget === 'draft' ? null : getPiece(calcTarget);
+  $('calcPick').innerHTML = opts([['draft', 'New piece (not in inventory yet)']].concat(db.pieces.map(x => [x.id, x.name || 'Untitled piece'])), calcTarget);
+  $('calcName').value = p ? p.name : draft.name;
+  $('calcActs').innerHTML = p
+    ? `<button data-act="open-piece" data-id="${esc(p.id)}">Open piece</button><button data-act="calc-new">Price a new piece</button>`
+    : `<button class="primary" data-act="calc-save">Save to inventory</button><button data-act="calc-clear">Clear</button>`;
+  renderPrices(); renderCal();
+  const sel = (list, i, k, pairs, v) => `<select data-list="${list}" data-i="${i}" data-k="${k}">${opts(pairs, v)}</select>`;
+  const inp = (list, i, k, v, attrs) => `<input data-list="${list}" data-i="${i}" data-k="${k}" value="${esc(v)}" ${attrs}>`;
+  const del = (list, i) => `<div><button class="x" data-del="${list}" data-i="${i}" title="Remove" aria-label="Remove">✕</button></div>`;
+  const metalOpts = Object.entries(METALS).map(([k, m]) => [k, m.name]);
+  $('wireRows').innerHTML = c.wires.map((w, i) => `<div class="row wire-row">
+      <div><label>Metal</label>${sel('wires', i, 'metal', metalOpts, w.metal)}</div>
+      <div><label>Gauge</label>${sel('wires', i, 'gauge', GAUGES.map(g => [g, g + ' ga']), w.gauge)}</div>
+      <div><label>Shape</label>${sel('wires', i, 'shape', Object.entries(SHAPES), w.shape)}</div>
+      <div><label>Length each</label>${inp('wires', i, 'length', w.length, 'type="number" inputmode="decimal" min="0" step="0.25" placeholder="0"')}</div>
+      <div><label>Unit</label>${sel('wires', i, 'unit', [['in', 'in'], ['cm', 'cm'], ['ft', 'ft']], w.unit)}</div>
+      <div><label>Strands</label>${inp('wires', i, 'strands', w.strands, 'type="number" inputmode="numeric" min="1" step="1"')}</div>
+      <div><label>$/ft (optional)</label>${inp('wires', i, 'costPerFt', w.costPerFt, 'type="number" inputmode="decimal" min="0" step="0.01" placeholder="supplier"')}</div>
+      ${del('wires', i)}<div class="out" id="wireOut${i}" style="grid-column:1/-1"></div></div>`).join('');
+  $('weighRows').innerHTML = c.weights.map((m, i) => `<div class="row weigh-row">
+      <div><label>Metal</label>${sel('weights', i, 'metal', metalOpts, m.metal)}</div>
+      <div><label>Weight</label>${inp('weights', i, 'weight', m.weight, 'type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"')}</div>
+      <div><label>Unit</label>${sel('weights', i, 'unit', Object.entries(WEIGHT_UNITS).map(([u, [t]]) => [u, t]), m.unit)}</div>
+      ${del('weights', i)}<div class="out" id="weighOut${i}" style="grid-column:1/-1"></div></div>`).join('');
+  $('stoneRows').innerHTML = c.stones.map((s, i) => `<div class="row stone-row">
+      <div><label>Stone</label>${inp('stones', i, 'name', s.name, 'placeholder="e.g. Labradorite cabochon"')}</div>
+      <div><label>Cost each ($)</label>${inp('stones', i, 'cost', s.cost, 'type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"')}</div>
+      <div><label>Qty</label>${inp('stones', i, 'qty', s.qty, 'type="number" inputmode="numeric" min="1" step="1"')}</div>
+      ${del('stones', i)}</div>`).join('');
+  $('supplyRows').innerHTML = c.supplies.map((s, i) => `<div class="row supply-row">
+      <div><label>Item</label>${inp('supplies', i, 'name', s.name, 'placeholder="e.g. Lobster clasp"')}</div>
+      <div><label>Cost ($)</label>${inp('supplies', i, 'cost', s.cost, 'type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"')}</div>
+      ${del('supplies', i)}</div>`).join('');
+  document.querySelectorAll('#view-calc [data-k]:not([data-list])').forEach(el => { el.value = c[el.dataset.k] ?? ''; });
+  document.querySelectorAll('#travelSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === (c.travelMode || 'miles')));
+  $('travelMiles').hidden = c.travelMode === 'direct';
+  $('travelDirect').hidden = c.travelMode !== 'direct';
+  calcNumbers();
+}
+function renderPrices() {
+  const sp = db.settings.spot;
+  const when = sp.at ? new Date(sp.at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  let html = `<div class="live"><div><b>Live market:</b> ${sp.silver ? `silver ${money(sp.silver)}/troy oz${sp.gold ? ` · gold ${money(sp.gold)}/troy oz` : ''} · copper ${money(sp.copper)}/lb` : 'not loaded'}
+      <div class="hint" style="margin:2px 0 0">${esc(spotStatus)}${when ? ' · prices from ' + esc(when) : ''}</div></div>
+      <button class="x" data-act="refresh-spot">↻ Refresh</button></div>`;
+  html += Object.keys(METALS).map(k => {
+    const p = db.settings.prices[k], L = LIVE[k], base = metalPerGram(k);
+    const du = L && L[0] === 'copper' ? ['lb', 453.592] : ['troy oz', 31.1035];
+    const field = L && p.live
+      ? `<div class="out pfield" style="padding:0;grid-column:span 2">${base != null ? `<b>${money(base * du[1])}</b>/${du[0]} · ${money(base)}/g` : 'waiting for market price'}</div>`
+      : `<div><input type="number" inputmode="decimal" min="0" step="0.01" data-price="${k}" data-pk="value" value="${esc(p.value)}" placeholder="price $"></div>
+         <div><select data-price="${k}" data-pk="unit">${opts(Object.entries(PRICE_UNITS).map(([u, [t]]) => [u, t]), p.unit)}</select></div>`;
+    return `<div class="row prow"><div>${esc(METALS[k].name)}</div>${field}
+      <div>${L ? `<label class="chk"><input type="checkbox" data-live="${k}"${p.live ? ' checked' : ''}>Live</label>` : ''}</div></div>`;
+  }).join('');
+  $('priceRows').innerHTML = html;
+}
+function renderCal() {
+  $('calList').innerHTML = db.settings.cal.map((c, i) => `<div class="saved-item">
+      <div><div>${esc(METALS[c.metal] ? METALS[c.metal].name : c.metal)} · ${c.gauge} ga ${esc((SHAPES[c.shape] || '').toLowerCase())} · ${money(c.perFt)}/ft</div>
+        <div class="meta">Entered ${esc(c.date)} · supplier charges ${c.fab >= 0 ? '+' : '−'}${money(Math.abs(c.fab))}/g over the metal price</div></div>
+      <div><button class="x" data-act="cal-del" data-i="${i}" title="Remove" aria-label="Remove">✕</button></div></div>`).join('');
+}
+function calcNumbers() {
+  if (view !== 'calc') return;
+  const c = curCalc(), r = compute(c), set = (id, v) => { $(id).textContent = money(v); };
+  c.wires.forEach((w, i) => {
+    const x = r.wires[i], out = $('wireOut' + i); if (!out) return;
+    out.innerHTML = num(w.length)
+      ? `${x.d.toFixed(2)} mm thick · ${x.feet.toFixed(2)} ft total · ${x.grams.toFixed(2)} g (${(x.grams / 31.1035).toFixed(3)} troy oz) · ` +
+        (x.cost == null ? `<span class="warn">${LIVE[w.metal] && db.settings.prices[w.metal].live ? 'market price not loaded yet: press Refresh in Metal prices' : `add a ${esc(METALS[w.metal].name)} price in Metal prices, or a $/ft`}</span>`
+          : `<b>${money(x.cost)}</b> from ${esc(x.source)}`)
+      : `${x.d.toFixed(2)} mm thick`;
+  });
+  c.weights.forEach((m, i) => {
+    const x = r.weights[i], out = $('weighOut' + i); if (!out) return;
+    const du = LIVE[m.metal] && LIVE[m.metal][0] === 'copper' ? ['lb', 453.592] : ['troy oz', 31.1035];
+    out.innerHTML = !x.grams ? '' : `${x.grams.toFixed(2)} g (${(x.grams / 31.1035).toFixed(3)} troy oz) · ` + (x.base == null
+      ? `<span class="warn">${LIVE[m.metal] && db.settings.prices[m.metal].live ? 'market price not loaded yet: press Refresh in Metal prices' : `add a ${esc(METALS[m.metal].name)} price in Metal prices`}</span>`
+      : `${money(x.base * du[1])}/${du[0]} ${LIVE[m.metal] && db.settings.prices[m.metal].live ? 'live market' : 'your price'} · <b>${money(x.cost)}</b>`);
+  });
+  const sp = db.settings.spot;
+  $('pricesNote').textContent = (sp.silver ? ` · silver ${money(sp.silver)}/oz${sp.gold ? ` · gold ${money(sp.gold)}/oz` : ''} · copper ${money(sp.copper)}/lb` : '') + (r.missing ? ' · some metal needs a price' : '');
+  if (r.missing) $('pricesBox').open = true;
+  $('travelOut').textContent = r.trip ? `${r.tripNote}Trip costs ${money(r.trip)}` + (r.pieces > 1 ? `, split ${r.pieces} ways = ${money(r.travel)} for this piece` : '') : r.tripNote;
+  set('wireTotal', r.wire); set('weighTotal', r.weighed); set('stoneTotal', r.stone); set('supplyTotal', r.supply); set('laborTotal', r.labor); set('travelTotal', r.travel);
+  set('sWire', r.wire); set('sWeigh', r.weighed); set('sStone', r.stone); set('sSupply', r.supply); set('sTravel', r.travel); set('sLabor', r.labor);
+  set('sCost', r.cost); set('sProfit', r.profit); set('sPrice', r.price);
+  $('sWeighLine').hidden = !(r.weighed || c.weights.length);
+  $('sWhole').textContent = r.cost > 0 ? `Lowest you should go (break even): ${money(r.cost)}` : 'Fill in the sections to see a price';
+  const parts = [['Wire', r.wire, COLORS.wire], ['Metal', r.weighed, COLORS.metal], ['Stones', r.stone, COLORS.stone], ['Supplies', r.supply, COLORS.supply], ['Travel', r.travel, COLORS.travel], ['Time', r.labor, COLORS.labor]].filter(x => x[1] > 0);
+  $('cbar').innerHTML = parts.map(x => `<div style="width:${x[1] / r.cost * 100}%;background:${x[2]}" title="${x[0]}: ${money(x[1])}"></div>`).join('');
+  $('legend').innerHTML = parts.map(x => `<span><i style="background:${x[2]}"></i>${x[0]} ${Math.round(x[1] / r.cost * 100)}%</span>`).join('');
+  $('mini').innerHTML = `<span class="muted">Cost ${money(r.cost)}</span><span>Suggested <b>${money(r.price)}</b></span>`;
+}
+
+/* ---------- Account page ---------- */
+function renderSettings() {
+  $('view-settings').innerHTML = `<div style="max-width:640px;margin-top:16px">
+    <div class="card"><h2>Account</h2><div id="acctBody"></div></div>
+    <div class="card"><h2>Your website</h2>
+      <p style="margin:0 0 6px"><a href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace('https://', '')}</a></p>
+      <p class="hint" style="margin:0">Post a piece from its page in Inventory. Only the name, photos, materials, price, description and Sold go online.</p></div>
+    <div class="card"><h2>On your phone</h2>
+      <p class="hint" style="margin:0">Open <b>${APP_URL.replace('https://', '')}</b> in Chrome on your phone, sign in here, then tap ⋮ → <b>Add to Home screen</b>. Your inventory stays the same on the PC and the phone.</p></div>
+    <div class="card"><h2>Hearthfield</h2>
+      <p class="hint" style="margin:0">When Hearthfield is signed in with the same account, new pieces, photos and sales tick off Juniper's jewelry chores.</p></div>
+  </div>`;
+  renderAcct();
+}
+
+/* ======================= events ======================= */
+document.addEventListener('input', onEdit);
+document.addEventListener('change', onEdit);
+function onEdit(e) {
+  const el = e.target, d = el.dataset;
+  if (el.id === 'photoIn') { if (e.type === 'change') { addPhotos(curPiece(), [...el.files]); el.value = ''; } return; }
+  if (el.id === 'search') { invQuery = el.value; renderInvList(); return; }
+  if (el.id === 'calcPick') { if (e.type === 'change') setCalcTarget(el.value); return; }
+  if (el.id === 'calcName') {
+    if (calcTarget === 'draft') { draft.name = el.value; put('mj_draft', draft); }
+    else { const p = getPiece(calcTarget); p.name = el.value; touchPiece(p); const o = $('calcPick').querySelector(`option[value="${CSS.escape(p.id)}"]`); if (o) o.textContent = p.name || 'Untitled piece'; }
+    return;
+  }
+  if (d.p) {
+    const p = curPiece(); if (!p || e.type !== 'input' && el.tagName !== 'SELECT') return;
+    p[d.p] = el.value; touchPiece(p);
+    if (d.p === 'price') $('priceHint').textContent = priceHint(p, suggestedOf(p)).replace(/<[^>]+>/g, '');
+    renderWebBox(p);
+    return;
+  }
+  if (d.live) { if (e.type !== 'change') return; db.settings.prices[d.live].live = el.checked; settingsChanged(); renderPrices(); calcNumbers(); return; }
+  if (d.price) { db.settings.prices[d.price][d.pk] = el.value; settingsChanged(); calcNumbers(); return; }
+  if (!d.k || !el.closest('#view-calc')) return;
+  const c = curCalc();
+  if (d.list) c[d.list][+d.i][d.k] = el.value; else c[d.k] = el.value;
+  if (d.setting) { db.settings[d.setting] = el.value; db.settingsAt = Date.now(); }
+  calcEdited(); if (d.setting) commit();
+  calcNumbers();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.target.id === 'inPass' || e.target.id === 'inEmail')) signIn(); });
+document.addEventListener('click', e => {
+  const t = e.target.closest('.tab'); if (t) { go(t.dataset.tab); return; }
+  const b = e.target.closest('button'); if (!b) return;
+  const a = b.dataset.act, p = curPiece();
+  if (b.dataset.add) {
+    const c = curCalc(), list = b.dataset.add;
+    c[list].push(list === 'wires' ? Object.assign(blankWire(), { metal: c.wires.at(-1)?.metal || 'copper' })
+      : list === 'weights' ? { metal: c.weights.at(-1)?.metal || 'sterling', weight: '', unit: c.weights.at(-1)?.unit || 'g' }
+      : list === 'stones' ? { name: '', cost: '', qty: 1 } : { name: '', cost: '' });
+    calcEdited(); renderCalc(); return;
+  }
+  if (b.dataset.del) { curCalc()[b.dataset.del].splice(+b.dataset.i, 1); calcEdited(); renderCalc(); return; }
+  if (b.dataset.mode) { curCalc().travelMode = b.dataset.mode; calcEdited(); renderCalc(); return; }
+  switch (a) {
+    case 'go': go(b.dataset.to); break;
+    case 'filter': invFilter = b.dataset.f; renderInventory(); break;
+    case 'new-piece': { const n = newPiece(); db.pieces.unshift(n); commit(); go('piece=' + n.id); setTimeout(() => { const i = $('pName'); if (i) i.focus(); }, 50); break; }
+    case 'open-piece': go('piece=' + encodeURIComponent(b.dataset.id)); break;
+    case 'status': if (!p) break; p.status = b.dataset.v; touchPiece(p); renderPiece(); if (isLive(p)) postPiece(p, true); break;
+    case 'cover': if (!p) break; p.photos.unshift(p.photos.splice(+b.dataset.i, 1)[0]); touchPiece(p); renderPiece(); pushPhotos(p); break;
+    case 'del-photo': if (p) delPhoto(p, +b.dataset.i); break;
+    case 'post': if (p) postPiece(p, true); break;
+    case 'hide': if (p) postPiece(p, false); break;
+    case 'delete-piece': if (p) deletePiece(p); break;
+    case 'price-it': if (p) go('calc=' + encodeURIComponent(p.id)); break;
+    case 'calc-new': setCalcTarget('draft'); break;
+    case 'calc-clear':
+      if ((draft.name || (draft.calc && compute(draft.calc).cost > 0)) && !confirm('Clear this unsaved piece?')) break;
+      draft = { name: '', calc: newCalc() }; put('mj_draft', draft); renderCalc(); break;
+    case 'calc-save': {
+      const n = newPiece({ name: draft.name.trim(), calc: curCalc() });
+      if (!n.name) { toast('Give the piece a name first.'); $('calcName').focus(); break; }
+      db.pieces.unshift(n); draft = { name: '', calc: null }; put('mj_draft', draft); commit();
+      setCalcTarget(n.id); toast(`"${n.name}" saved to your inventory.`); break;
+    }
+    case 'refresh-spot': loadSpot(); break;
+    case 'cal-del': db.settings.cal.splice(+b.dataset.i, 1); settingsChanged(); renderCal(); calcNumbers(); break;
+    case 'cal-add': {
+      const metal = $('calMetal').value, gauge = +$('calGauge').value, shape = $('calShape').value, perFt = num($('calPerFt').value), base = metalPerGram(metal);
+      if (!perFt) { $('calMsg').textContent = 'Enter their price per foot first.'; break; }
+      if (base == null) { $('calMsg').textContent = `Needs a ${METALS[metal].name} metal price first (live or typed in).`; break; }
+      const fab = perFt / gramsPerFt(metal, gauge, shape) - base;   // supplier's extra charge per gram
+      db.settings.cal = db.settings.cal.filter(c => !(c.metal === metal && c.gauge === gauge && c.shape === shape));
+      db.settings.cal.push({ metal, gauge, shape, perFt, fab, date: new Date().toLocaleDateString() });
+      db.settings.cal.sort((x, y) => x.metal.localeCompare(y.metal) || x.gauge - y.gauge);
+      settingsChanged(); renderCal(); calcNumbers();
+      $('calMsg').textContent = `Saved. ${METALS[metal].name} ${gauge} ga will now follow the market plus your supplier's markup.`;
+      $('calPerFt').value = ''; break;
+    }
+    case 'sign-in': signIn(); break;
+    case 'sign-out': signOut(); break;
+    case 'sync-now': syncNow(); break;
+  }
+});
+
+/* ======================= start ======================= */
+$('calMetal').innerHTML = opts(Object.entries(METALS).map(([k, m]) => [k, m.name]), 'sterling');
+$('calGauge').innerHTML = opts(GAUGES.map(g => [g, g + ' ga']), 20);
+$('calShape').innerHTML = opts(Object.entries(SHAPES), 'round');
+window.addEventListener('hashchange', parseHash);
+parseHash();
+loadSpot();                                   // fresh market prices on open
+setInterval(loadSpot, 5 * 60 * 1000);         // and every 5 minutes
+syncNow();                                    // get the latest inventory
+setInterval(() => { if (document.visibilityState === 'visible') syncNow(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncNow(); });
+window.addEventListener('online', () => syncNow());
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
